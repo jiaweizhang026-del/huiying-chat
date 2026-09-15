@@ -1,0 +1,436 @@
+@font-face {
+  font-family: zcoolwenyiti;
+  src: url("/assets/zcoolwenyiti.ttf") format("truetype");
+  font-weight: 400;
+  font-display: swap;
+}
+.encounter-card h1 {
+  font-family: zcoolwenyiti, "PingFang SC", sans-serif;
+  font-weight: 400;
+}
+.screen-welcome,
+.screen-onboarding,
+.screen-create {
+  background: white;
+}
+.welcome-illustration {
+  position: absolute;
+  top: 8.9%;
+  left: 50%;
+  transform: translateX(-50%);
+  height: 55%;
+  max-height: calc(100% - 290px);
+  aspect-ratio: 1;
+  max-width: 119.4%;
+}
+.screen-welcome .welcome-art {
+  background: transparent;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  aspect-ratio: 1;
+  opacity: 1;
+}
+.screen-welcome .welcome-art img {
+  object-fit: contain;
+  animation: none;
+}
+.welcome-hi {
+  position: absolute;
+  top: 43.75%;
+  left: 36.875%;
+  width: 33.333%;
+  height: 16.667%;
+  pointer-events: none;
+}
+.welcome-hi img {
+  position: absolute;
+}
+.screen-welcome .welcome-copy {
+  left: 16px;
+  right: 16px;
+  bottom: 24px;
+  color: #14151d;
+}
+.screen-welcome .welcome-copy h1 {
+  font-family: zcoolwenyiti, sans-serif;
+  font-weight: 400;
+  font-size: 32px;
+  line-height: 40px;
+  letter-spacing: 0;
+  margin-bottom: 24px;
+}
+.screen-welcome .welcome-copy h1 span {
+  margin-top: 8px;
+}
+.welcome-copy em {
+  font-style: normal;
+  color: #13acff;
+}
+.screen-welcome .login-button,
+.screen-welcome .welcome-settings {
+  color: #14151d;
+  border: 1px solid #e4e3e1;
+  background: #f9f8f635;
+  box-shadow: 0 2px 12px #12131909;
+}
+.screen-welcome .login-note {
+  color: #999da8;
+  letter-spacing: 0;
+}
+.onboarding {
+  position: relative;
+  height: 100%;
+}
+.gift-title {
+  position: absolute;
+  top: 8.9%;
+  left: 10%;
+  width: 80%;
+  text-align: center;
+  font-family: zcoolwenyiti, sans-serif;
+}
+.gift-title h1 {
+  font-family: inherit;
+  font-size: 40px;
+  line-height: 48px;
+  font-weight: 400;
+  margin: 0 0 8px;
+}
+.gift-title p {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  font-size: 14px;
+}
+.gift-title p img {
+  width: 92px;
+  height: 3px;
+}
+.gift-art {
+  background: transparent;
+  position: absolute;
+  top: 28.5%;
+  left: 25.5%;
+  width: 49%;
+  aspect-ratio: 1;
+  height: auto;
+}
+.gift-art img {
+  object-fit: contain;
+}
+.gift-actions {
+  position: absolute;
+  bottom: 42px;
+  left: 16px;
+  right: 16px;
+  display: grid;
+  gap: 12px;
+}
+.pill-button {
+  width: 100%;
+  min-height: 50px;
+  border: 1px solid #e4e3e1;
+  border-radius: 42px;
+  background: #f9f8f635;
+  color: #16171c;
+  box-shadow: 0 2px 12px #12131909;
+  padding: 12px 20px;
+  font-size: 16px;
+  transition:
+    transform 0.18s,
+    background 0.18s;
+}
+.pill-button:active {
+  transform: scale(0.98);
+  background: #eee;
+}
+.pill-button.primary {
+  color: #fff;
+  background: #111;
+  border-color: #c5c5c5;
+}
+.pill-button:disabled {
+  opacity: 0.5;
+  cursor: wait;
+}
+.companion-form {
+  padding: 12px 16px 28px;
+}
+.screen-create .header {
+  background: white;
+}
+.created-sheet {
+  max-width: 370px;
+}
+.created-note .tags {
+  flex-wrap: wrap;
+}
+.note-person > div {
+  min-width: 0;
+}
+.companion-form fieldset {
+  border: 0;
+  padding: 0;
+  margin: 0;
+  display: grid;
+  gap: 16px;
+  min-width: 0;
+}
+.avatar-upload {
+  display: grid;
+  justify-items: center;
+  gap: 8px;
+  font-size: 12px;
+  color: #979cad;
+}
+.avatar-upload button {
+  width: 114px;
+  height: 114px;
+  border-radius: 40px;
+  background: #f7f7f7;
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+}
+.avatar-upload .photo {
+  width: 114px;
+  height: 114px;
+}
+.companion-form label {
+  display: block;
+  font-size: 13px;
+  line-height: 20px;
+  color: #5d6272;
+}
+.field-emoji {
+  display: inline-grid;
+  place-items: center;
+  min-width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: #e5f9ff;
+  margin-left: 4px;
+}
+.companion-form input:not([type="file"]),
+.companion-form select,
+.companion-form textarea {
+  display: block;
+  box-sizing: border-box;
+  width: 100%;
+  margin-top: 8px;
+  min-height: 54px;
+  padding: 14px 8px;
+  border: 0;
+  border-radius: 4px;
+  background: #f7f7f7;
+  color: #272933;
+  font:
+    16px/24px "PingFang SC",
+    sans-serif;
+  box-shadow: none;
+}
+.companion-form textarea {
+  height: 54px;
+  resize: vertical;
+  max-height: 180px;
+}
+.companion-form :is(input, textarea)::placeholder {
+  color: #c9cdd7;
+}
+.companion-form :is(input, textarea, select):focus {
+  outline: 0;
+  background: #f2f3f4;
+}
+.companion-form select:focus-visible {
+  outline: 2px solid #8b9aab;
+}
+.companion-save {
+  margin-top: 30px;
+}
+.form-hint {
+  font-size: 11px;
+  color: #9a9da5;
+  margin: 12px 0 0;
+}
+.form-error {
+  font-size: 13px;
+  color: #a15d52;
+  margin: 10px 0;
+}
+.onboarding-discover {
+  padding-bottom: 20px !important;
+}
+.conversation-row.is-pinned {
+  background: #e6e6e6;
+}
+.pin-label {
+  font-size: 10px;
+  font-weight: 400;
+  margin-left: 8px;
+  color: #9298a7;
+}
+.menu-scrim {
+  position: absolute;
+  inset: 0;
+  z-index: 35;
+  background: transparent;
+}
+.conversation-menu {
+  position: absolute;
+  width: 150px;
+  padding: 4px;
+  background: #fff;
+  border-radius: 3px;
+  box-shadow: 0 6px 24px #0002;
+  animation: fade-in 0.15s ease;
+}
+.conversation-menu button {
+  display: block;
+  width: 100%;
+  padding: 6px 8px;
+  min-height: 36px;
+  text-align: left;
+  font-size: 16px;
+}
+.conversation-menu button:hover,
+.conversation-menu button:focus-visible {
+  background: #f1f1f1;
+  border-radius: 2px;
+}
+.delete-note {
+  font-size: 14px;
+  line-height: 1.7;
+  margin-bottom: 24px;
+  color: #656b78;
+}
+.empty-conversations {
+  padding: 80px 24px;
+  text-align: center;
+  color: #979cad;
+  display: grid;
+  gap: 18px;
+}
+.created-note {
+  position: relative;
+  background: white;
+  border-radius: 8px;
+  padding: 18px;
+  margin: 0 24px 16px;
+  box-shadow: 0 10px 36px #0001;
+  animation: note-arrive 0.6s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+.created-note > small {
+  font-size: 12px;
+  color: #9096a8;
+}
+.note-rule {
+  height: 1px;
+  border-bottom: 1px dashed #c4c8d1;
+  margin: 12px 0;
+}
+.note-person {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+}
+.note-person > .photo {
+  width: 56px;
+  height: 56px;
+  flex-shrink: 0;
+  border-radius: 50%;
+}
+.note-person strong {
+  display: block;
+  overflow-wrap: anywhere;
+  font-size: 14px;
+  margin-bottom: 6px;
+}
+.created-note p {
+  color: #9399a7;
+  font-size: 12px;
+  line-height: 18px;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  margin-top: 12px;
+}
+@keyframes note-arrive {
+  from {
+    opacity: 0;
+    transform: translateY(65px) scale(0.92);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+.thought {
+  position: relative;
+  isolation: isolate;
+  overflow: visible;
+  background: transparent;
+  margin: 0 0 28px 0;
+  max-width: min(316px, 100%);
+  padding: 2px 0 9px;
+}
+.thought::before {
+  content: "";
+  position: absolute;
+  inset: -4px -4px -7px;
+  background: url("/assets/v3-thought-cloud.svg") center/100% 100% no-repeat;
+  z-index: -1;
+  pointer-events: none;
+}
+.thought::after {
+  content: "";
+  position: absolute;
+  bottom: -16px;
+  left: 13px;
+  width: 11px;
+  height: 8px;
+  border-radius: 50%;
+  background: white;
+  filter: blur(2px);
+}
+.thought-toggle {
+  font-size: 14px;
+  padding: 8px;
+  line-height: 20px;
+}
+.thought-body {
+  padding-top: 6px;
+  padding-bottom: 4px;
+}
+.thought-body p {
+  font-size: 14px;
+  line-height: 20px;
+  color: #626779;
+}
+.thought-body small {
+  font-size: 9px;
+}
+@media (max-width: 360px) {
+  .screen-welcome .welcome-copy h1 {
+    font-size: 28px;
+  }
+  .welcome-hi {
+    transform: scale(0.85);
+    transform-origin: left top;
+  }
+  .gift-title p img {
+    width: 64px;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .created-note,
+  .conversation-menu {
+    animation: none;
+  }
+  .pill-button {
+    transition: none;
+  }
+}

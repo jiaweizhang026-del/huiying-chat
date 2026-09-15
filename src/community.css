@@ -1,0 +1,815 @@
+/* Figma additions 9–14; keep the original app shell and glass navigation. */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+.community-tabs {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 24px;
+  white-space: nowrap;
+}
+.community-tabs button {
+  font-size: 16px;
+  line-height: 24px;
+  color: #9295a3;
+  padding: 8px 0;
+  font-weight: 500;
+  transition: color 0.2s;
+}
+.community-tabs button[aria-selected="true"] {
+  color: #17181d;
+}
+.community-feed {
+  padding-bottom: 104px;
+  animation: feed-enter 0.22s ease-out;
+}
+.community-post {
+  background: white;
+  padding: 16px 32px 16px 16px;
+  margin-bottom: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.community-author {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  text-align: left;
+  width: 100%;
+  min-width: 0;
+  padding: 0;
+}
+.community-author > .photo {
+  height: 49px;
+  width: 49px;
+  flex: none;
+  border-radius: 4px;
+}
+.community-author > span:last-child {
+  min-width: 0;
+  flex: 1;
+}
+.community-author strong {
+  font-size: 16px;
+  line-height: 24px;
+  display: block;
+  margin-bottom: 4px;
+  font-weight: 500;
+}
+.community-author .tags {
+  gap: 6px;
+  flex-wrap: wrap;
+}
+.community-author .tags span {
+  font-size: 13px;
+  line-height: 18px;
+  padding: 0 4px;
+  white-space: nowrap;
+}
+.community-text {
+  font-size: 16px;
+  line-height: 24px;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  margin: 0;
+}
+.community-photos {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  align-items: flex-start;
+}
+.community-photos button {
+  padding: 0;
+  border-radius: 4px;
+  max-width: 100%;
+}
+.community-photos .photo {
+  width: 191px;
+  height: 123px;
+  border-radius: 4px;
+  box-shadow: 0 4px 16px #12131912;
+}
+.community-photos .portrait-photo {
+  width: 120px;
+  height: 162px;
+}
+.community-photos.multiple .photo {
+  width: 100px;
+  height: 100px;
+}
+.community-actions {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  color: #9298ad;
+  min-height: 24px;
+}
+.community-actions > button {
+  padding: 0;
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  min-height: 32px;
+  font-size: 16px;
+  transition:
+    color 0.18s,
+    transform 0.18s;
+}
+.community-actions > button[aria-pressed="true"] {
+  color: #b16c7e;
+}
+.community-actions > button[aria-pressed="true"] img {
+  filter: sepia(0.6) saturate(2);
+}
+.community-actions > small {
+  margin-left: auto;
+  font-size: 10px;
+  color: #bcc0c4;
+}
+.community-glyph {
+  width: 24px;
+  height: 24px;
+  display: block;
+  flex: none;
+}
+.community-hot {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 14px;
+  margin: 0;
+}
+.community-hot img {
+  height: 20px;
+  width: 20px;
+}
+.community-discussion {
+  font-size: 13px;
+  color: #737e90;
+  line-height: 21px;
+}
+.community-discussion:empty {
+  display: none;
+}
+.community-discussion p {
+  margin: 0;
+  padding: 3px 8px;
+  background: #f7f7f8;
+  overflow-wrap: anywhere;
+}
+.community-discussion b {
+  font-weight: 500;
+}
+.community-discussion button {
+  font-size: 12px;
+  padding: 4px 0;
+  color: #8e96a5;
+}
+.community-footnote {
+  text-align: center;
+  padding: 22px 20px;
+  font-size: 11px;
+  line-height: 18px;
+  color: #a6aaa8;
+}
+/* Same reusable Sheet handles focus trapping and dismissal. */
+.overlay:has(.comment-sheet) {
+  background: rgba(18, 19, 25, 0.32);
+  backdrop-filter: none;
+}
+.comment-sheet {
+  height: min(484px, calc(var(--viewport-height, 100dvh) - 88px));
+  max-height: 90%;
+  padding: 0;
+  border-radius: 32px 32px 0 0;
+  background: #f5f5f5;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+.comment-sheet .sheet-handle {
+  display: none;
+}
+.comment-sheet .sheet-heading {
+  position: relative;
+  min-height: 76px;
+  padding: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex: none;
+}
+.comment-sheet .sheet-heading h2 {
+  font-weight: 400;
+  font-size: 14px;
+  line-height: 20px;
+}
+.comment-sheet .sheet-heading > .icon-button {
+  color: #17181d;
+  position: absolute;
+  left: 16px;
+  top: 16px;
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  background: #fefefe;
+}
+.comment-identity {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: #747c90;
+}
+.comment-identity .photo {
+  height: 40px;
+  width: 40px;
+  border-radius: 4px;
+}
+.comment-form {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
+  padding: 0 18px 32px;
+  gap: 12px;
+}
+.comment-writing {
+  padding: 76px 28px 0;
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+}
+.comment-quote {
+  display: block;
+  font-family: Arial, sans-serif;
+  font-weight: 700;
+  line-height: 52px;
+  font-size: 90px;
+  color: #dadada;
+  height: 61px;
+}
+.comment-writing textarea {
+  width: 100%;
+  flex: 1;
+  min-height: 60px;
+  resize: none;
+  border: 0;
+  background: transparent;
+  outline: none;
+  box-shadow: none;
+  font-size: 24px;
+  line-height: 1.45;
+  color: #33373e;
+  padding: 0;
+  caret-color: #17181d;
+}
+.comment-writing textarea::placeholder {
+  color: #b7b7b7;
+  font-size: 32px;
+  font-weight: 500;
+}
+.comment-writing textarea:focus-visible {
+  outline: none;
+  box-shadow: none;
+}
+.comment-submit {
+  position: relative;
+  flex: none;
+  min-height: 48px;
+  border-radius: 42px;
+  font-size: 16px;
+  width: 100%;
+  color: #18191c;
+}
+.comment-submit:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+.comment-form .error-box {
+  font-size: 12px;
+  max-height: 56px;
+  overflow: auto;
+  margin: 0;
+}
+/* Profile: original Figma spacing, grey rows, a quiet glass action. */
+.profile-page {
+  padding: 28px 16px 110px;
+}
+.profile-portrait {
+  width: 120px;
+  height: 120px;
+  margin: 0 auto 12px;
+}
+.profile-page > h2 {
+  font-size: 16px;
+  line-height: 24px;
+  font-weight: 500;
+  margin-bottom: 4px;
+}
+.profile-page > .tags span {
+  font-size: 13px;
+  line-height: 18px;
+}
+.profile-bio {
+  min-height: 40px;
+  max-width: 315px;
+  font-size: 13px;
+  line-height: 20px;
+  margin: 32px auto 28px;
+  color: #7e8781;
+}
+.profile-section {
+  background: #fff;
+  padding: 16px;
+  margin-bottom: 28px;
+  min-height: 100px;
+}
+.profile-section h3 {
+  font-size: 14px;
+  line-height: 20px;
+  font-weight: 500;
+  margin-bottom: 8px;
+}
+.profile-section p {
+  font-size: 13px;
+  line-height: 20px;
+  color: #8a918c;
+}
+.profile-page .setting-row {
+  height: 64px;
+  min-height: 64px;
+  font-size: 16px;
+  border-bottom: 1px solid #e2e2e2;
+}
+.profile-page > .muted-note {
+  margin-top: 14px;
+}
+.profile-chat {
+  left: 16px;
+  bottom: 40px;
+  width: calc(100% - 32px);
+  height: 48px;
+  border-radius: 42px;
+  color: #17181d;
+  font-size: 16px;
+}
+/* ---------- 发现页星球场景（Figma 572-32948 展开 / 560-31255 收起） ---------- */
+/* The expanded frame's own background is white, not the app's paper grey, so
+   the faint artwork wash sits on the surface the design intends. */
+.screen-discover {
+  background: #fff;
+}
+/* Fixed scene behind the screen. The artwork sits at 402x603 in the design
+   and is a very faint layer: alpha peaks at 40% and fades to nothing by 75%
+   of its height, and that fade is baked into the exported PNG itself, so the
+   page stays light and the dark star labels stay readable. */
+.planet-scene {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 0;
+  overflow: hidden;
+  pointer-events: none;
+  z-index: 0;
+}
+/* Locked to the design's ratio rather than a fixed pixel height: at a wider
+   preview a fixed height stretches the crop and moves the glow out of place,
+   which throws the whole composition off. */
+.planet-scene-art {
+  display: block;
+  width: 100%;
+  aspect-ratio: 402 / 603;
+  height: auto;
+}
+/* The scene is painted first, so the header and list need to sit above it. */
+.screen-discover > .header,
+.screen-discover > .scroll-area {
+  position: relative;
+  z-index: 1;
+}
+/* The design runs the artwork from the very top of the frame and sets the
+   title straight onto it: there the header is a layout bar, not a surface.
+   The shared .header paints the paper colour, which stopped the scene at
+   y=77 and left a white band above the artwork. */
+.screen-discover > .header {
+  background: transparent;
+}
+/* A 0.5px hairline sits at y=77 in the design (spanning wider than the
+   frame, hence the bleed). With the header no longer opaque this edge has
+   to be drawn explicitly instead of coming free with the surface. */
+.screen-discover > .header::after {
+  content: "";
+  position: absolute;
+  left: -26px;
+  right: -26px;
+  bottom: 0;
+  height: 0.5px;
+  background: #c7c7c7;
+}
+/* The collapsed form is the corner icon: expanded, the sphere itself is the
+   affordance (the design has no icon on that frame), so the toggle fades out
+   as the sphere unfolds. */
+.planet-toggle {
+  display: inline-flex;
+  transition:
+    opacity 340ms var(--ease),
+    transform 520ms var(--ease);
+}
+.planet-toggle.hidden {
+  opacity: 0;
+  transform: scale(0.35);
+  pointer-events: none;
+}
+/* The stage is the space the sphere occupies. Scrolling the cards collapses
+   it to zero and they slide up over the artwork — that overlap is the
+   background change, so it never has to snap between two states. The
+   dismiss gesture lives on the list, not the sphere, so a drag on the
+   sphere can only ever mean one thing: rotate it. */
+.planet-stage {
+  position: relative;
+  height: 0;
+  overflow: hidden;
+  transition: height 560ms var(--ease);
+}
+.with-planet .planet-stage {
+  /* 383px is exactly where the design puts the cards (y=469 minus the list's
+     y=86). Keeping it fixed rather than a share of the viewport matters: the
+     sphere's radius is derived from this box, so shrinking it on a short
+     window would squash the globe and crowd the labels. The list below just
+     scrolls instead. */
+  height: 383px;
+}
+/* The sphere is an interactive constellation, not a decorative particle canvas. */
+.planet {
+  position: absolute;
+  inset: 0 0 20px;
+  touch-action: none;
+  cursor: grab;
+  /* Folded away into the corner icon: the origin is measured at runtime and
+     handed over as --collapse-origin so the shrink lands on the icon. */
+  transform-origin: var(--collapse-origin, 100% 0%);
+  transition:
+    transform 560ms var(--ease),
+    opacity 420ms var(--ease);
+}
+.planet:active {
+  cursor: grabbing;
+}
+.discover-list:not(.with-planet) .planet {
+  transform: scale(0.04);
+  opacity: 0;
+  pointer-events: none;
+}
+.planet:focus-visible {
+  outline: 2px solid #536758;
+  outline-offset: 6px;
+  border-radius: 12px;
+}
+.planet-star {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 30px;
+  height: 30px;
+  margin: -15px 0 0 -15px;
+  padding: 0;
+  border: 0;
+  background: none;
+  display: grid;
+  place-items: center;
+  cursor: pointer;
+  /* transform is written every frame from the sphere projection */
+  will-change: transform;
+}
+.star-light {
+  display: block;
+  width: var(--dot, 8px);
+  height: var(--dot, 8px);
+  border-radius: 50%;
+  background: var(--star-color);
+  opacity: var(--dot-opacity, 1);
+  /* The design's dots carry no outer glow: a solid fill softened by a 0.5px
+     blur, with a faint dither of light green over part of it. At 3-13px that
+     grain is sub-pixel, so only the slight edge softening is reproduced. */
+  filter: blur(0.5px);
+  transition: transform 220ms var(--ease);
+}
+.star-name {
+  position: absolute;
+  left: 50%;
+  bottom: calc(50% + var(--dot, 8px) / 2 + 3px);
+  transform: translate(
+    calc(-50% + var(--label-x, 0px)),
+    var(--label-y, 0px)
+  );
+  font-size: var(--label-size, 12px);
+  line-height: 1.15;
+  /* The discover frame's caption token, which is what the design actually
+     uses here. It reads properly now that the artwork behind it is the faint
+     wash the design intends rather than a solid dark image. */
+  color: #010b3269;
+  opacity: var(--label-opacity, 0.6);
+  white-space: nowrap;
+  pointer-events: none;
+}
+.planet-star:hover .star-light,
+.planet-star:focus-visible .star-light {
+  transform: scale(1.25);
+}
+.planet-star:hover .star-name,
+.planet-star:focus-visible .star-name {
+  opacity: 1;
+}
+.planet-star:focus-visible {
+  border-radius: 50%;
+  outline: 2px solid #536758;
+  outline-offset: 3px;
+}
+.planet-hint {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  text-align: center;
+  font-size: 10px;
+  /* Caption grey, not white: the scene behind it is the faint light wash the
+     design intends, so light text would disappear into it. */
+  color: #010b3252;
+  pointer-events: none;
+}
+.explore-note {
+  margin: 4px 0 0;
+  font-size: 10px;
+  color: #010b3269;
+  text-align: center;
+}
+.encounter {
+  position: absolute;
+  inset: 0;
+  z-index: 15;
+  overflow: hidden;
+  background: #ffffff00;
+  animation: encounter-white 0.65s ease-out forwards;
+}
+.encounter-source {
+  position: absolute;
+  left: var(--origin-x);
+  top: var(--origin-y);
+  width: 12px;
+  height: 12px;
+  margin: -6px;
+  border-radius: 50%;
+  background: var(--encounter-color);
+  animation: star-expand 0.85s cubic-bezier(0.2, 0.65, 0.3, 1) both;
+}
+.encounter-card {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  transform: scale(0.94);
+  filter: blur(12px);
+  transition:
+    opacity 0.7s ease,
+    transform 0.9s cubic-bezier(0.2, 0.65, 0.3, 1),
+    filter 0.8s ease;
+}
+.phase-traits .encounter-card {
+  opacity: 1;
+  transform: scale(1);
+  filter: blur(0);
+}
+.phase-dissolve .encounter-card {
+  opacity: 0;
+  transform: scale(1.5);
+  filter: blur(24px);
+}
+.encounter-card h1 {
+  position: absolute;
+  top: 25.4%;
+  left: 0;
+  width: 100%;
+  text-align: center;
+  font-size: 32px;
+  line-height: 40px;
+  font-weight: 600;
+  color: #5d6068;
+}
+.encounter-haze {
+  position: absolute;
+  width: 110%;
+  height: auto;
+  aspect-ratio: 1;
+  /* Keep the original soft glow silhouette; tint it with the selected star. */
+  background: var(--encounter-color);
+  -webkit-mask-image: var(--haze-mask);
+  mask-image: var(--haze-mask);
+  mask-mode: alpha;
+  -webkit-mask-size: 100% 100%;
+  mask-size: 100% 100%;
+  -webkit-mask-repeat: no-repeat;
+  mask-repeat: no-repeat;
+  left: -5%;
+  top: 27%;
+  pointer-events: none;
+}
+.encounter-trait {
+  position: absolute;
+  background: #fff;
+  border-radius: 24px;
+  padding: 7px 24px;
+  font-size: 20px;
+  line-height: 28px;
+  color: #adb1c0;
+  opacity: 0;
+  transform: translateY(10px);
+  transition:
+    opacity 0.6s,
+    transform 0.7s;
+}
+.trait-0 {
+  left: 15.4%;
+  top: 36.4%;
+  transition-delay: 0.1s;
+}
+.trait-1 {
+  left: 21.9%;
+  top: 46.8%;
+  transition-delay: 0.25s;
+}
+.trait-2 {
+  left: 61%;
+  top: 51.5%;
+  transition-delay: 0.4s;
+  white-space: nowrap;
+  padding-inline: 18px;
+}
+.phase-traits .encounter-trait {
+  opacity: 1;
+  transform: translateY(0);
+}
+.encounter-controls {
+  position: absolute;
+  bottom: 30px;
+  left: 24px;
+  right: 24px;
+  display: flex;
+  justify-content: space-between;
+}
+.encounter-controls button {
+  font-size: 12px;
+  color: #949ca2;
+  padding: 12px;
+  border-radius: 24px;
+  background: #ffffffaa;
+}
+@keyframes star-expand {
+  0% {
+    transform: scale(1);
+    opacity: 1;
+    filter: blur(0);
+  }
+  65% {
+    opacity: 0.65;
+  }
+  100% {
+    transform: scale(52);
+    opacity: 0;
+    filter: blur(2px);
+  }
+}
+@keyframes encounter-white {
+  to {
+    background: #fff;
+  }
+}
+@keyframes feed-enter {
+  from {
+    opacity: 0.7;
+    transform: translateY(4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+/* Diffuse the user's existing welcome bloom; no bright ring or abrupt removal. */
+.bloom-core {
+  animation: soft-bloom-core 5.2s ease-in-out both;
+  filter: blur(58px);
+}
+.bloom-swell {
+  width: 72%;
+  margin: -36% 0 0 -36%;
+  background: radial-gradient(
+    ellipse,
+    #ffffff50 0%,
+    #ffffff2b 27%,
+    #ffffff10 49%,
+    transparent 72%
+  );
+  filter: blur(38px);
+  animation: soft-bloom-swell 4.6s ease-in-out both;
+}
+.bloom-swell-b {
+  animation-delay: 0.4s;
+}
+.bloom-swell-c {
+  animation-delay: 0.8s;
+}
+.bloom-caustic {
+  animation: bloom-caustic 5.1s ease-in-out both;
+  filter: blur(26px);
+}
+@keyframes soft-bloom-core {
+  0% {
+    opacity: 0;
+    transform: scale(0.9) translateY(3%);
+  }
+  35% {
+    opacity: 0.55;
+  }
+  100% {
+    opacity: 0;
+    transform: scale(1.12) translateY(-3%);
+  }
+}
+@keyframes soft-bloom-swell {
+  0% {
+    opacity: 0;
+    transform: scale(0.8) translateY(4%);
+  }
+  40% {
+    opacity: 0.42;
+  }
+  100% {
+    opacity: 0;
+    transform: scale(2) translateY(-5%);
+  }
+}
+@media (max-height: 650px) {
+  .comment-writing {
+    padding-top: 22px;
+  }
+  .comment-form {
+    padding-bottom: 16px;
+  }
+  .comment-sheet {
+    max-height: 86%;
+  }
+}
+@media (max-width: 360px) {
+  .community-post {
+    padding-right: 16px;
+  }
+  .community-author {
+    gap: 12px;
+  }
+  .community-author .tags {
+    gap: 3px;
+  }
+  .community-author .tags span {
+    font-size: 11px;
+  }
+  .encounter-trait {
+    font-size: 16px;
+    padding-inline: 14px;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .encounter,
+  .encounter-card,
+  .encounter-trait,
+  .community-feed {
+    animation: none;
+    transition: none;
+  }
+  .encounter {
+    background: #fff;
+  }
+  .encounter-source,
+  .welcome-bloom {
+    display: none;
+  }
+  .phase-traits .encounter-card {
+    transform: none;
+  }
+  .phase-dissolve .encounter-card {
+    transform: none;
+    filter: none;
+  }
+  .star-light {
+    transition: none;
+  }
+}
