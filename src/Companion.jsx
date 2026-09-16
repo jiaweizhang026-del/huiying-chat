@@ -203,7 +203,12 @@ export function CreatedNote({ person, ui, onComplete }) {
     return () => clearTimeout(timer);
   }, []);
   return (
-    <Sheet title="伙伴已创建" onClose={finish} className="created-sheet">
+    <Sheet
+      title="伙伴已创建"
+      onClose={finish}
+      className="created-sheet"
+      minimal
+    >
       <div className="created-note">
         <small>Note</small>
         <div className="note-rule" />
@@ -216,7 +221,7 @@ export function CreatedNote({ person, ui, onComplete }) {
         </div>
         <p>{person.bio}</p>
       </div>
-      <button className="pill-button" onClick={finish}>
+      <button className="pill-button sheet-action" onClick={finish}>
         查看 TA 的资料
       </button>
     </Sheet>

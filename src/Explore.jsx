@@ -50,10 +50,8 @@ function project([x, y, z], yaw, pitch) {
 // floor was re-decayed every frame, which bled it down to about a 12 minute
 // revolution — indistinguishable from a static sphere.
 const IDLE_SPIN = 0.12;
-// Beat after the sphere unfolds before the drift starts, so it settles into
-// place first. Deliberately only set once: a throw should coast straight
-// into the drift instead of stopping dead the moment the finger lifts.
-const IDLE_GRACE = 1400;
+// Begin drifting on mount without requiring a tap or drag.
+const IDLE_GRACE = 0;
 export function Planet({ people, active = true, onSelect, onCollapse }) {
   const rootRef = useRef(null);
   const starRefs = useRef([]);
@@ -75,7 +73,13 @@ export function Planet({ people, active = true, onSelect, onCollapse }) {
   });
   const reduced = useRef(false);
   useEffect(() => {
-    reduced.current = matchMedia("(prefers-reduced-motion: reduce)").matches;
+    const media = matchMedia("(prefers-reduced-motion: reduce)");
+    const sync = () => {
+      reduced.current = media.matches;
+    };
+    sync();
+    media.addEventListener("change", sync);
+    return () => media.removeEventListener("change", sync);
   }, []);
   // Layout is measured rather than hard-coded: the preview frame is
   // resizable (375/402/430) and the sphere is sized off its own box.
@@ -105,6 +109,7 @@ export function Planet({ people, active = true, onSelect, onCollapse }) {
       // Clamp dt so a backgrounded tab doesn't jump the sphere on return.
       const dt = Math.min(0.05, (now - last) / 1000);
       last = now;
+      if (!active) return;
       if (!current.idleAt) current.idleAt = now + IDLE_GRACE;
       if (!current.dragging) {
         if (reduced.current) {
@@ -144,9 +149,15 @@ export function Planet({ people, active = true, onSelect, onCollapse }) {
         const near = (depth + 1) / 2;
         node.style.transform = `translate3d(${(box.cx + x * box.r).toFixed(2)}px, ${(box.cy - y * box.r).toFixed(2)}px, 0)`;
         node.style.zIndex = String(Math.round(near * 40));
-        node.style.setProperty("--dot", `${lerp(DOT_MIN, DOT_MAX, near).toFixed(2)}px`);
+        node.style.setProperty(
+          "--dot",
+          `${lerp(DOT_MIN, DOT_MAX, near).toFixed(2)}px`,
+        );
         node.style.setProperty("--dot-opacity", near.toFixed(3));
-        node.style.setProperty("--label-size", `${lerp(LABEL_MIN, LABEL_MAX, near).toFixed(2)}px`);
+        node.style.setProperty(
+          "--label-size",
+          `${lerp(LABEL_MIN, LABEL_MAX, near).toFixed(2)}px`,
+        );
         // Flat opacity: the design's label colour already carries 0.41 alpha
         // and depth is expressed through the font size alone. Fading it
         // further only made the far labels disappear.
@@ -155,7 +166,7 @@ export function Planet({ people, active = true, onSelect, onCollapse }) {
     };
     current.raf = requestAnimationFrame(frame);
     return () => cancelAnimationFrame(current.raf);
-  }, [points]);
+  }, [points, active]);
   function down(e) {
     const current = spin.current;
     current.dragging = true;

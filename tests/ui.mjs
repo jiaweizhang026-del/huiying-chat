@@ -31,12 +31,27 @@ try {
   await page.locator(".welcome-art.ready").waitFor();
   await screenshot("01-welcome");
   await page.getByText("微信一键登录", { exact: true }).click();
+  await page.getByRole("heading", { name: "Life gift" }).waitFor();
+  await page.locator('[data-save-state="saved"]').waitFor();
+  await page.reload();
   await page.locator(".conversation-row").first().waitFor();
   assert.equal(await page.locator(".conversation-row").count(), 4);
   await screenshot("02-conversations");
   await page.getByRole("button", { name: "文牧野" }).click();
   const input = page.getByRole("textbox", { name: "消息", exact: true });
   await input.click();
+  await page.waitForFunction(
+    () =>
+      getComputedStyle(document.querySelector(".composer")).borderColor ===
+      "rgb(218, 255, 163)",
+  );
+  assert.equal(
+    await page
+      .locator(".composer")
+      .evaluate((el) => getComputedStyle(el).borderColor),
+    "rgb(218, 255, 163)",
+    "frame 41 focus highlights only the capsule border",
+  );
   assert.equal(
     await input.evaluate((el) => getComputedStyle(el).outlineStyle),
     "none",

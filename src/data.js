@@ -137,6 +137,7 @@ export function initialState() {
   return {
     version: 1,
     loggedIn: false,
+    hasLoggedIn: false,
     onboardingComplete: false,
     customCharacters: [],
     pinned: [],

@@ -1,4 +1,7 @@
 /* Figma additions 9–14; keep the original app shell and glass navigation. */
+.screen-moments {
+  background: #ededed;
+}
 .sr-only {
   position: absolute;
   width: 1px;
@@ -73,7 +76,7 @@
 .community-author .tags span {
   font-size: 13px;
   line-height: 18px;
-  padding: 0 4px;
+  padding: 0 5px;
   white-space: nowrap;
 }
 .community-text {
@@ -98,7 +101,7 @@
   width: 191px;
   height: 123px;
   border-radius: 4px;
-  box-shadow: 0 4px 16px #12131912;
+  box-shadow: var(--shadow-medium);
 }
 .community-photos .portrait-photo {
   width: 120px;
@@ -120,7 +123,7 @@
   display: flex;
   align-items: center;
   gap: 2px;
-  min-height: 32px;
+  min-height: 24px;
   font-size: 16px;
   transition:
     color 0.18s,
@@ -192,7 +195,7 @@
   height: min(484px, calc(var(--viewport-height, 100dvh) - 88px));
   max-height: 90%;
   padding: 0;
-  border-radius: 32px 32px 0 0;
+  border-radius: 20px 20px 0 0;
   background: #f5f5f5;
   display: flex;
   flex-direction: column;
@@ -245,7 +248,7 @@
   gap: 12px;
 }
 .comment-writing {
-  padding: 76px 28px 0;
+  padding: 89px 28px 0;
   flex: 1;
   min-height: 0;
   display: flex;
@@ -331,7 +334,7 @@
   color: #7e8781;
 }
 .profile-section {
-  background: #fff;
+  background: var(--bubble);
   padding: 16px;
   margin-bottom: 28px;
   min-height: 100px;
@@ -348,10 +351,13 @@
   color: #8a918c;
 }
 .profile-page .setting-row {
+  width: calc(100% + 32px);
+  margin-left: -16px;
+  padding: 0 16px;
   height: 64px;
   min-height: 64px;
   font-size: 16px;
-  border-bottom: 1px solid #e2e2e2;
+  border-bottom: 0.5px solid #ededef;
 }
 .profile-page > .muted-note {
   margin-top: 14px;
@@ -360,7 +366,7 @@
   left: 16px;
   bottom: 40px;
   width: calc(100% - 32px);
-  height: 48px;
+  height: 50px;
   border-radius: 42px;
   color: #17181d;
   font-size: 16px;
@@ -370,6 +376,12 @@
    the faint artwork wash sits on the surface the design intends. */
 .screen-discover {
   background: #fff;
+}
+.screen-discover:has(.discover-list:not(.with-planet)) {
+  background: #ededed;
+}
+.discover-list:not(.with-planet) .card-surface {
+  border-color: var(--glass-border);
 }
 /* Fixed scene behind the screen. The artwork sits at 402x603 in the design
    and is a very faint layer: alpha peaks at 40% and fades to nothing by 75%
@@ -510,10 +522,7 @@
   position: absolute;
   left: 50%;
   bottom: calc(50% + var(--dot, 8px) / 2 + 3px);
-  transform: translate(
-    calc(-50% + var(--label-x, 0px)),
-    var(--label-y, 0px)
-  );
+  transform: translate(calc(-50% + var(--label-x, 0px)), var(--label-y, 0px));
   font-size: var(--label-size, 12px);
   line-height: 1.15;
   /* The discover frame's caption token, which is what the design actually

@@ -14,6 +14,7 @@
     "test:production": "node tests/production.mjs",
     "test:community": "node tests/run-isolated.mjs --community",
     "test:companion": "node tests/run-isolated.mjs --companion",
+    "test:visual": "node tests/run-isolated.mjs --visual",
     "format": "prettier --write src server shared server.mjs vite.config.js tests package.json index.html"
   },
   "dependencies": {

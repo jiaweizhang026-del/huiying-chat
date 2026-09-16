@@ -23,6 +23,9 @@ try {
     .locator(".app-shell")
     .screenshot({ path: "test-results/v2-welcome-soft.png" });
   await page.getByRole("button", { name: "微信一键登录" }).click();
+  await page.getByRole("heading", { name: "Life gift" }).waitFor();
+  await page.locator('[data-save-state="saved"]').waitFor();
+  await page.reload();
   const nav = (label) =>
     page
       .getByRole("navigation")

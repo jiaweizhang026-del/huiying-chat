@@ -12,6 +12,9 @@ try {
   await page.goto(process.env.TEST_URL || "http://localhost:5178");
   await legacyUser(page);
   await page.getByText("微信一键登录", { exact: true }).click();
+  await page.getByRole("heading", { name: "Life gift" }).waitFor();
+  await page.locator('[data-save-state="saved"]').waitFor();
+  await page.reload();
   await page.getByRole("button", { name: "文牧野" }).click();
   await page
     .getByRole("textbox", { name: "消息", exact: true })

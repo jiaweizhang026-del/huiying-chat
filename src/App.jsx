@@ -18,6 +18,7 @@ import {
   Heart,
   MessageCircle,
   Plus,
+  Pencil,
   Settings,
   LogOut,
   Hand,
@@ -151,7 +152,14 @@ function Header({ title, onBack, right, onTitle }) {
     </header>
   );
 }
-function Sheet({ title, onClose, children, className = "", heading }) {
+function Sheet({
+  title,
+  onClose,
+  children,
+  className = "",
+  heading,
+  minimal = false,
+}) {
   const ref = useRef(null);
   useEffect(() => {
     const prev = document.activeElement;
@@ -194,13 +202,15 @@ function Sheet({ title, onClose, children, className = "", heading }) {
         aria-label={title}
         ref={ref}
       >
-        <div className="sheet-handle" />
-        <div className="sheet-heading">
-          <h2>{heading || title}</h2>
-          <IconButton label="关闭" onClick={onClose}>
-            <X size={20} />
-          </IconButton>
-        </div>
+        {!minimal && <div className="sheet-handle" />}
+        {!minimal && (
+          <div className="sheet-heading">
+            <h2>{heading || title}</h2>
+            <IconButton label="关闭" onClick={onClose}>
+              <X size={20} />
+            </IconButton>
+          </div>
+        )}
         {children}
       </section>
     </div>
@@ -298,11 +308,7 @@ export default function App({ initialData }) {
   const needsOnboarding = data.onboardingComplete === false;
   const [nav, setNav] = useState([
     {
-      page: data.loggedIn
-        ? needsOnboarding
-          ? "onboarding"
-          : "conversations"
-        : "welcome",
+      page: data.loggedIn ? "conversations" : "welcome",
     },
   ]);
   const route = nav.at(-1),
@@ -353,6 +359,7 @@ export default function App({ initialData }) {
   useEffect(() => () => clearTimeout(longPress.current), []);
   function createCompanion() {
     setMenu(null);
+    setCompanionDraft(emptyCompanion());
     go({
       page: "create",
       onboarding: needsOnboarding || page === "onboarding",
@@ -368,6 +375,7 @@ export default function App({ initialData }) {
     });
   }
   async function saveCompanion() {
+    const editing = route.editing === true;
     const p = {
       ...companionDraft,
       name: companionDraft.name.trim(),
@@ -380,8 +388,14 @@ export default function App({ initialData }) {
         p,
       ],
       contacts: d.contacts.includes(p.id) ? d.contacts : [...d.contacts, p.id],
+      onboardingComplete: true,
     }));
     await flushSave();
+    if (editing) {
+      back();
+      flash("伙伴资料已更新");
+      return;
+    }
     setCreated(customPerson(p, asset("s1-imgRectangle5")));
   }
   function chatMenu(event, id) {
@@ -944,7 +958,32 @@ export default function App({ initialData }) {
                   src="/assets/v3-welcome-cat.png"
                   className="welcome-art"
                 />
-                <div className="welcome-hi" aria-hidden="true">
+                <div className="cat-sleep" aria-hidden="true">
+                  {[
+                    ["large", 123, 146, 29, 23],
+                    ["medium", 145, 118, 22.696, 18],
+                    ["small", 165, 97, 15.13, 12],
+                  ].map(([size, x, y, w, h], i) => (
+                    <img
+                      key={size}
+                      src={`/assets/welcome-sleep-z-${size}.svg`}
+                      alt=""
+                      style={{
+                        // Include the exported hand-drawn stroke bounds from Figma.
+                        left: `${((x + 39 - w * 0.1308) / 480) * 100}%`,
+                        top: `${((y - 117 - h * 0.1022) / 480) * 100}%`,
+                        width: `${((w * 1.1468) / 480) * 100}%`,
+                        height: `${((h * 1.1973) / 480) * 100}%`,
+                        animationDelay: `${i * -1.2}s`,
+                      }}
+                    />
+                  ))}
+                </div>
+                <svg
+                  className="welcome-hi"
+                  viewBox="0 0 160 80"
+                  aria-hidden="true"
+                >
                   {[
                     ["imgVector5", 8, 0, 14, 72],
                     ["imgVector6", 41, 8, 11, 66],
@@ -952,20 +991,46 @@ export default function App({ initialData }) {
                     ["imgVector8", 66, 38, 8, 33],
                     ["imgEllipse47", 68, 23, 9, 9],
                     ["imgVector9", 96, 33, 59, 20],
-                  ].map(([name, x, y, w, h]) => (
-                    <img
-                      key={name}
-                      src={`/assets/v3-welcome-${name}.svg`}
-                      style={{
-                        left: `${(x / 160) * 100}%`,
-                        top: `${(y / 80) * 100}%`,
-                        width: `${(w / 160) * 100}%`,
-                        height: `${(h / 80) * 100}%`,
-                      }}
-                      alt=""
-                    />
+                  ].map(([name, x, y, w, h], index) => (
+                    <g key={name} transform={`translate(${x} ${y})`}>
+                      <defs>
+                        <mask
+                          id={`hi-stroke-${index}`}
+                          maskUnits="userSpaceOnUse"
+                          x="-1"
+                          y="-1"
+                          width={w + 2}
+                          height={h + 2}
+                        >
+                          <path
+                            className="hi-ink"
+                            d={
+                              index === 5
+                                ? "M-16 18 Q12 -8 30 10 T76 4"
+                                : w > h
+                                  ? `M-10 ${h / 2} H${w + 10}`
+                                  : `M${w / 2} -12 V${h + 12}`
+                            }
+                            fill="none"
+                            stroke="white"
+                            strokeWidth={index === 5 ? 32 : Math.min(w, h) + 4}
+                            pathLength="1"
+                            style={{
+                              animationDelay: `${0.35 + index * 0.44}s`,
+                            }}
+                          />
+                        </mask>
+                      </defs>
+                      <image
+                        href={`/assets/v3-welcome-${name}.svg`}
+                        width={w}
+                        height={h}
+                        preserveAspectRatio="none"
+                        mask={`url(#hi-stroke-${index})`}
+                      />
+                    </g>
                   ))}
-                </div>
+                </svg>
               </div>
               <button
                 aria-label="应用设置"
@@ -994,13 +1059,15 @@ export default function App({ initialData }) {
                     setLoginBusy(true);
                     await sleep(550);
                     try {
-                      update((d) => ({ ...d, loggedIn: true }));
+                      update((d) => ({
+                        ...d,
+                        loggedIn: true,
+                        hasLoggedIn: true,
+                      }));
                       await flushSave();
                       setNav([
                         {
-                          page: needsOnboarding
-                            ? "onboarding"
-                            : "conversations",
+                          page: "onboarding",
                         },
                       ]);
                     } catch {
@@ -1041,7 +1108,7 @@ export default function App({ initialData }) {
           {page === "conversations" && (
             <>
               <Header
-                title="下午好"
+                title="下午好 🧢"
                 right={
                   <IconButton label="添加伙伴" onClick={() => setMenu({})}>
                     <Icon name="s3-imgLine2" />
@@ -1395,7 +1462,9 @@ export default function App({ initialData }) {
                         {expanded[m.id] && (
                           <div className="thought-body">
                             <p>{m.innerVoice}</p>
-                            <small>角色内心旁白 · AI 创作</small>
+                            <small className="sr-only">
+                              角色内心旁白 · AI 创作
+                            </small>
                           </div>
                         )}
                       </div>
@@ -1410,7 +1479,7 @@ export default function App({ initialData }) {
                   >
                     <Avatar src={person.avatar} />
                     <span className="thinking-emoji" key={emoji}>
-                      {["💭", "🤔", "💡"][emoji]}
+                      💭<span>{["😊", "🤔", "💡"][emoji]}</span>
                     </span>
                   </div>
                 )}
@@ -1430,12 +1499,18 @@ export default function App({ initialData }) {
               )}
               <div className="composer frosted-glass">
                 <IconButton label="语音输入" onClick={voice}>
-                  <Icon name="s1-imgVoiceRound" size={32} />
+                  <img
+                    className="design-icon"
+                    src="/assets/v4-voice.svg"
+                    width="32"
+                    height="32"
+                    alt=""
+                  />
                 </IconButton>
                 <textarea
                   ref={inputRef}
                   aria-label="消息"
-                  placeholder="说点什么…"
+                  placeholder=""
                   value={draft}
                   rows={1}
                   maxLength={2000}
@@ -1455,7 +1530,13 @@ export default function App({ initialData }) {
                   label="表情"
                   onClick={() => setSheet({ type: "emoji" })}
                 >
-                  <Icon name="s1-imgEmoji" size={32} />
+                  <img
+                    className="design-icon"
+                    src="/assets/v4-emoji.svg"
+                    width="32"
+                    height="32"
+                    alt=""
+                  />
                 </IconButton>
                 {draft.trim() ? (
                   <button
@@ -1471,7 +1552,13 @@ export default function App({ initialData }) {
                     label="更多聊天功能"
                     onClick={() => setSheet({ type: "actions" })}
                   >
-                    <Icon name="s1-imgAddRound" size={32} />
+                    <img
+                      className="design-icon"
+                      src="/assets/v4-plus.svg"
+                      width="32"
+                      height="32"
+                      alt=""
+                    />
                   </IconButton>
                 )}
               </div>
@@ -1687,7 +1774,11 @@ export default function App({ initialData }) {
                         setCompanionDraft({
                           ...data.customCharacters.find((p) => p.id === pid),
                         });
-                        go({ page: "create", onboarding: needsOnboarding });
+                        go({
+                          page: "create",
+                          editing: true,
+                          onboarding: needsOnboarding,
+                        });
                       } else if (data.contacts.includes(pid))
                         go({ page: "settings", person: pid });
                       else {
@@ -1699,7 +1790,9 @@ export default function App({ initialData }) {
                       }
                     }}
                   >
-                    {data.contacts.includes(pid) ? (
+                    {person.setting ? (
+                      <Pencil size={20} />
+                    ) : data.contacts.includes(pid) ? (
                       <Check size={22} />
                     ) : (
                       <Icon name="s3-imgLine2" />
@@ -1942,31 +2035,37 @@ export default function App({ initialData }) {
           />
         )}
         {sheet?.type === "delete-conversation" && (
-          <Sheet title="删除聊天？" onClose={() => setSheet(null)}>
-            <p className="delete-note">
-              从列表移除与{personById(sheet.id).name}
-              的对话。聊天记录和记忆会保留，重新聊天即可恢复。
-            </p>
-            <button
-              className="pill-button"
-              onClick={async () => {
-                const id = sheet.id;
-                update((d) => ({
-                  ...d,
-                  hiddenChats: [...new Set([...(d.hiddenChats || []), id])],
-                  pinned: (d.pinned || []).filter((x) => x !== id),
-                }));
-                try {
-                  await flushSave();
-                  setSheet(null);
-                  flash("已移除对话，历史记录仍可恢复。");
-                } catch {
-                  flash("未能保存，请重试。");
-                }
-              }}
-            >
-              确认删除
-            </button>
+          <Sheet
+            className="delete-chat-sheet"
+            title="删除聊天"
+            onClose={() => setSheet(null)}
+          >
+            <div className="sheet-body">
+              <p className="delete-note">
+                从列表移除与{personById(sheet.id).name}
+                的对话。聊天记录和记忆会保留，重新聊天即可恢复。
+              </p>
+              <button
+                className="pill-button sheet-action"
+                onClick={async () => {
+                  const id = sheet.id;
+                  update((d) => ({
+                    ...d,
+                    hiddenChats: [...new Set([...(d.hiddenChats || []), id])],
+                    pinned: (d.pinned || []).filter((x) => x !== id),
+                  }));
+                  try {
+                    await flushSave();
+                    setSheet(null);
+                    flash("已移除对话，历史记录仍可恢复。");
+                  } catch {
+                    flash("未能保存，请重试。");
+                  }
+                }}
+              >
+                确认删除
+              </button>
+            </div>
           </Sheet>
         )}
         {commentPost && (
@@ -2050,7 +2149,7 @@ export default function App({ initialData }) {
                   服务读取，不会存进浏览器。无需在聊天里发送密钥。页面修改会自动热更新。
                 </p>
                 <button
-                  className="primary-button"
+                  className="sheet-action"
                   onClick={async () => {
                     try {
                       const r = await fetch("/api/status");
@@ -2333,7 +2432,7 @@ export default function App({ initialData }) {
                   </>
                 )}
                 <button
-                  className="primary-button"
+                  className="sheet-action"
                   disabled={
                     uploading ||
                     publishing ||
@@ -2374,7 +2473,7 @@ export default function App({ initialData }) {
                     aria-label="搜索角色关键词"
                   />
                 </div>
-                <button className="primary-button">查看结果</button>
+                <button className="sheet-action">查看结果</button>
               </form>
             )}
             {sheet.type === "delete-memory" && (
@@ -2382,7 +2481,7 @@ export default function App({ initialData }) {
                 <p>{sheet.memory.text}</p>
                 <p className="muted-note">只移除这条记忆，不影响聊天记录。</p>
                 <button
-                  className="primary-button"
+                  className="sheet-action"
                   onClick={() => {
                     const m = sheet.memory;
                     update((d) => ({
@@ -2438,7 +2537,7 @@ export default function App({ initialData }) {
                 <div className="voice-listening">🎙️</div>
                 <p>说完后，文字会填入输入框。</p>
                 <button
-                  className="primary-button"
+                  className="sheet-action"
                   onClick={() => {
                     sheet.recognition.stop();
                     setSheet(null);

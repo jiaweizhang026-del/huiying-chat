@@ -288,7 +288,7 @@ export function CommentComposer({
           </p>
         )}
         <button
-          className="comment-submit frosted-glass"
+          className="comment-submit sheet-action"
           disabled={!text.trim() || saving}
         >
           {saving ? "正在发表…" : "发表"}

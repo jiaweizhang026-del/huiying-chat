@@ -28,6 +28,7 @@ export function validState(s) {
     obj(s) &&
     s.version === 1 &&
     typeof s.loggedIn === "boolean" &&
+    (s.hasLoggedIn === undefined || typeof s.hasLoggedIn === "boolean") &&
     str(s.name, 80) &&
     str(s.bio, 1000) &&
     (s.onboardingComplete === undefined ||

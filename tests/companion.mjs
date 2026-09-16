@@ -22,6 +22,11 @@ try {
   await page.goto(url);
   await page.locator(".welcome-art.ready").waitFor();
   await page.evaluate(() => document.fonts.ready);
+  await page.waitForFunction(() =>
+    [...document.querySelectorAll(".hi-ink")].every(
+      (e) => Number.parseFloat(getComputedStyle(e).strokeDashoffset) === 0,
+    ),
+  );
   await shot("welcome");
   await page.getByRole("button", { name: "微信一键登录" }).click();
   await page.getByRole("heading", { name: "Life gift" }).waitFor();
@@ -31,6 +36,19 @@ try {
   await page.locator(".discover-list.with-planet").waitFor();
   assert.equal(await page.getByRole("navigation").count(), 0);
   await shot("first-discovery");
+  // The first point is the pole and does not move during yaw rotation.
+  const starPosition = () =>
+    page
+      .locator(".planet-star")
+      .nth(8)
+      .evaluate((e) => e.style.transform);
+  const beforeSpin = await starPosition();
+  await page.waitForTimeout(650);
+  assert.notEqual(
+    await starPosition(),
+    beforeSpin,
+    "planet rotates without touch",
+  );
   await page.getByRole("button", { name: "返回", exact: true }).click();
   await page.getByRole("button", { name: "创建 AI 伙伴", exact: true }).click();
   await page.getByRole("button", { name: "保存", exact: true }).click();
@@ -85,6 +103,16 @@ try {
   await page.getByRole("button", { name: "查看 TA 的资料" }).click();
   await page.getByRole("heading", { name: "林间", exact: true }).waitFor();
   await shot("custom-profile");
+  await page.getByRole("button", { name: "编辑伙伴资料" }).click();
+  await page
+    .getByRole("textbox", { name: "备注", exact: true })
+    .fill("林间更新");
+  await page.getByRole("button", { name: "保存", exact: true }).click();
+  await page.getByRole("heading", { name: "林间更新", exact: true }).waitFor();
+  await page.getByRole("button", { name: "编辑伙伴资料" }).click();
+  await page.getByRole("textbox", { name: "备注", exact: true }).fill("林间");
+  await page.getByRole("button", { name: "保存", exact: true }).click();
+  await page.getByRole("heading", { name: "林间", exact: true }).waitFor();
   await page.getByRole("button", { name: "和 TA 聊聊", exact: true }).click();
   await page.getByRole("textbox", { name: "消息", exact: true }).fill("你好");
   await page.getByRole("button", { name: "发送消息" }).click();
@@ -92,13 +120,19 @@ try {
     .getByText("看看 TA 的想法", { exact: true })
     .waitFor({ timeout: 55000 });
   await shot("cloud-closed");
+  assert.ok(
+    await page
+      .locator(".thought")
+      .evaluate((e) => e.getBoundingClientRect().height <= 40),
+    "frame 29 collapsed thought has a compact 40px body",
+  );
   await page.getByText("看看 TA 的想法", { exact: true }).click();
   await shot("cloud-open");
   assert.match(
     await page
       .locator(".thought")
       .evaluate((e) => getComputedStyle(e, "::before").backgroundImage),
-    /v3-thought-cloud/,
+    /v4-thought-cloud/,
   );
   await saved();
   await page.getByRole("button", { name: "返回", exact: true }).click();
@@ -117,6 +151,20 @@ try {
   await page.waitForTimeout(650);
   await held.dispatchEvent("pointerup", { pointerType: "touch" });
   await page.getByRole("menuitem", { name: "删除聊天" }).click();
+  await shot("delete-dialog");
+  const deleteLayout = await page
+    .locator(".delete-chat-sheet")
+    .evaluate((el) => {
+      const sheet = el.getBoundingClientRect();
+      const body = el.querySelector(".sheet-body").getBoundingClientRect();
+      const button = el.querySelector(".pill-button").getBoundingClientRect();
+      return (
+        button.left > sheet.left &&
+        button.right < sheet.right &&
+        body.width <= sheet.width
+      );
+    });
+  assert.ok(deleteLayout, "delete sheet content and button have safe insets");
   await page.getByRole("button", { name: "确认删除", exact: true }).click();
   await page.getByRole("dialog").waitFor({ state: "hidden" });
   assert.equal(await page.locator(".conversation-row").count(), 0);
@@ -189,6 +237,15 @@ try {
     }),
   });
   assert.equal(invalid.status, 400);
+  await page.getByRole("button", { name: "返回", exact: true }).click();
+  await nav("我的");
+  await page.getByRole("button", { name: "返回欢迎页", exact: true }).click();
+  await saved();
+  await page.getByRole("button", { name: "微信一键登录" }).click();
+  await page.getByRole("heading", { name: "Life gift" }).waitFor();
+  await saved();
+  await page.reload();
+  await page.locator(".screen-conversations").waitFor();
   assert.deepEqual(errors, []);
   console.log(
     "PASS: new-user selection, required fields, creation/save/note/profile/custom chat, cloud bubbles, pin/delete persistence, default planet, keyboard/reduced motion, widths, unknown custom rejection.",
