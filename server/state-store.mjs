@@ -3,6 +3,7 @@ import path from "node:path";
 import { randomUUID } from "node:crypto";
 import { exploreCharacters } from "../shared/explore-characters.mjs";
 import { validCustom } from "../shared/custom-characters.mjs";
+import { MEMORY_KINDS } from "../shared/memory.mjs";
 
 const ids = ["shen", "wen", "jiang", "gu", "li", "wang", "zhang", "chen"];
 ids.push(...exploreCharacters.map((p) => p.id));
@@ -71,7 +72,23 @@ export function validState(s) {
           str(m.id, 100) &&
           str(m.text, 2000) &&
           /^\d{4}-\d{2}-\d{2}$/.test(m.date) &&
-          (!m.photos || list(m.photos, 3, image)),
+          (!m.photos || list(m.photos, 3, image)) &&
+          // Typed/scored memories (P0: selection & merging). All optional so
+          // older snapshots and the seed entries stay valid.
+          (!m.kind || MEMORY_KINDS.includes(m.kind)) &&
+          (!m.source || str(m.source, 40)) &&
+          (!m.emotion || str(m.emotion, 40)) &&
+          (!m.salience ||
+            (Number.isInteger(m.salience) &&
+              m.salience >= 1 &&
+              m.salience <= 5)) &&
+          (!m.hits || (Number.isFinite(m.hits) && m.hits >= 0)) &&
+          (m.referenceCount === undefined ||
+            (Number.isSafeInteger(m.referenceCount) &&
+              m.referenceCount >= 0)) &&
+          (m.mentionCount === undefined ||
+            (Number.isSafeInteger(m.mentionCount) && m.mentionCount >= 1)) &&
+          (!m.updatedAt || Number.isFinite(m.updatedAt)),
       ),
     ) &&
     list(

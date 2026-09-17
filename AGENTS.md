@@ -24,6 +24,8 @@
 - `busyRef` 立即防重复提交，`busy` 渲染每角色加载态。异步回复携带捕获的角色id，不要改成读取当前路由后落库，防串会话。
 - `dataRef` 为请求读取最新设置/记忆；消息渲染后scrollIntoView，但用户阅读旧消息时不强拉滚动。
 - `src/data.js` 人物和演示数据；`src/assets.json` 本地资源映射；不要重新依赖Figma过期URL。
+- `shared/memory.mjs` 记忆层纯函数：normalizeMemory / mergeMemory / selectMemories / bumpHits / formatMemoryLines。客户端挑选与服务端规范化共用；改这里要同步跑 `tests/memory.test.mjs`。示例记忆(seed)与图片/演示摘录(photo/quote)永不进模型，敏感信息（密码/证件/住址）直接丢弃。
+- `shared/persona-cards.mjs` 是服务端独有的人物卡（说话方式/在意的事/绝对不做），不接受客户端 system prompt；`shared/prompt.mjs` 负责 system 组装，顺序为：人设卡 → 规则 → 输出格式 → 记忆块 → 时间上下文（稳定前缀在前以命中 DeepSeek 前缀缓存），`buildSystem(body, custom, now)` 的 now 可注入以便测试。
 - `src/styles.css` 用402×874为设计坐标参考。桌面手机预览高度会适配窗口，移动端走 visualViewport 高度。
 - 底栏是 keyed screen 外的稳定节点，四个tab独立line/fill素材配对；不要把所有聊天图标固定fill。`.frosted-glass` 统一导航/输入栏材质，输入栏绝对定位覆盖聊天滚动层；记忆 `.memory-mood` 使用原稿蓝色圆形底图。
 - 聊天输入框点击/聚焦只显示文字光标，整个胶囊边框按图41从 #f5ffe6 过渡到 #daffa3；不要套用全局矩形focus-visible描边；保留按钮和其他控件的键盘焦点提示。
@@ -60,7 +62,7 @@
 - 默认模型deepseek-flash，可由DEEPSEEK_MODEL覆盖。请求JSON输出 messages/innerVoice/memory，禁用thinking，不读取reasoning_content。
 - innerVoice是虚构人物旁白，不是私有推理；不要向用户声称是真实思维过程。
 - 无key明确演示模式；有key调用失败显示重试，不静默替换演示。没有真实key时不能报告API端到端通过。
-- 用户图片不发给DeepSeek。真实请求最多20条文字与8条非示例记忆。示例记忆不得进入模型上下文。
+- 用户图片不发给DeepSeek。真实请求最多20条文字与10条打分挑选的非示例记忆（稳定事实保底最多4条）。示例记忆不得进入模型上下文。引用计数使用 referenceCount，不使用旧 hits；重复确认计数为 mentionCount。
 - 本机服务对Host/Origin做限制。这是本地演示，未经用户要求不发布公网、不新建第三方账户/项目。
 - `.env` 和 `.local-data` 不可通过Web静态服务读取，不提交或展示其内容；CodeBuddy迁移要保留server/，密钥与用户数据私下单独迁移。生产当前使用文件存储，仅支持本地单用户，尚未完成公网账号/鉴权/费用隔离。
 

@@ -89,6 +89,7 @@ export function allPosts(data) {
   });
 }
 export function visiblePosts(data, scope) {
+  if (scope === "mine") return allPosts(data).filter((p) => p.person === "me");
   return allPosts(data).filter(
     (p) =>
       (p.scope || "friends") === scope &&

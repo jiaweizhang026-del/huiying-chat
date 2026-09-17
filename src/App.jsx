@@ -45,6 +45,14 @@ import {
   ConversationMenu,
 } from "./Companion.jsx";
 import { customPerson } from "../shared/custom-characters.mjs";
+import {
+  selectMemories,
+  mergeMemory,
+  bumpHits,
+  normalizeMemory,
+  inferExplicitMemory,
+} from "../shared/memory.mjs";
+import { buildChatContext } from "../shared/context.mjs";
 
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 const personById = (id) => people.find((p) => p.id === id) || people[1];
@@ -320,7 +328,8 @@ export default function App({ initialData }) {
     [busy, setBusy] = useState({}),
     busyRef = useRef({});
   const [config, setConfig] = useState({ configured: false, mode: "checking" }),
-    [width, setWidth] = useState(402);
+    [width, setWidth] = useState(402),
+    [height, setHeight] = useState(874);
   const [expanded, setExpanded] = useState({}),
     [emoji, setEmoji] = useState(0),
     [query, setQuery] = useState("");
@@ -524,6 +533,7 @@ export default function App({ initialData }) {
                 emoji: "📷",
                 photos: [image],
                 photoMemory: true,
+                kind: "photo",
                 source: "聊天图片",
               },
               ...list,
@@ -689,6 +699,20 @@ export default function App({ initialData }) {
   async function request(task, id, messages) {
     await flushSave();
     const state = dataRef.current;
+    const history = messages
+      .filter((m) => m.role !== "system" && !m.image)
+      .slice(-20)
+      .map((m) => ({ role: m.role, content: m.text }));
+    const lastUser =
+      history.filter((m) => m.role === "user").at(-1)?.content || "";
+    // The model used to get "the newest 8 memories", so anything older was
+    // invisible forever. Send a scored mix instead: stable facts always, plus
+    // whatever is fresh, often-recalled, or related to what they just said.
+    const picked = selectMemories(state.memories[id] || [], {
+      query: lastUser,
+      now: Date.now(),
+    });
+    const prefs = { ...defaultSettings, ...state.settings[id] };
     const response = await fetch("/api/chat", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -696,15 +720,15 @@ export default function App({ initialData }) {
       body: JSON.stringify({
         task,
         person: id,
-        settings: { ...defaultSettings, ...state.settings[id] },
-        messages: messages
-          .filter((m) => m.role !== "system" && !m.image)
-          .slice(-20)
-          .map((m) => ({ role: m.role, content: m.text })),
-        memories: (state.memories[id] || [])
-          .filter((m) => !m.seed)
-          .slice(0, 8)
-          .map((m) => m.text),
+        settings: { mode: prefs.mode, language: prefs.language },
+        messages: history,
+        memories: picked.map((m) => ({
+          id: m.id,
+          text: m.text,
+          kind: m.kind,
+          date: m.date,
+        })),
+        context: buildChatContext(messages, { task }),
       }),
     });
     const result = await response.json();
@@ -716,6 +740,13 @@ export default function App({ initialData }) {
         mode: "live",
         verifiedAt: result.verifiedAt,
       }));
+    // Carried along so the reply can reward the memories it actually used.
+    const allowedIds = new Set(picked.map((m) => m.id));
+    result.usedMemoryIds = (
+      Array.isArray(result.usedMemoryIds) ? result.usedMemoryIds : []
+    ).filter((memoryId) => allowedIds.has(memoryId));
+    if (result.memory?.matchId && !allowedIds.has(result.memory.matchId))
+      delete result.memory.matchId;
     return result;
   }
   async function respond(id, messages, userMessageId) {
@@ -751,29 +782,35 @@ export default function App({ initialData }) {
       }
       const lastUser = messages.filter((m) => m.role === "user").at(-1)?.text;
       const memory =
-        result.memory ||
+        normalizeMemory(result.memory, { source: "AI 整理" }) ||
+        (result.mode === "demo" ? inferExplicitMemory(lastUser) : null) ||
         (result.mode === "demo" &&
         lastUser &&
         !/^(你好|嗨|hi|hello)[！!。\s]*$/i.test(lastUser)
-          ? `你说：「${lastUser.slice(0, 180)}」`
-          : null);
-      if (memory)
-        update((d) => ({
-          ...d,
-          memories: {
-            ...d.memories,
-            [id]: [
+          ? // Demo mode has no model to summarise: keep the excerpt as a
+            // low-value "quote" so it stays visible but never eats a slot.
+            normalizeMemory(
               {
-                id: uid(),
-                date: dayKey(),
-                text: memory,
-                emoji: "🌿",
-                source: result.mode === "demo" ? "聊天摘录" : "AI 整理",
+                text: `你说：「${lastUser.slice(0, 180)}」`,
+                kind: "quote",
+                salience: 1,
               },
-              ...(d.memories[id] || []),
-            ],
-          },
-        }));
+              { source: "聊天摘录" },
+            )
+          : null);
+      const usedIds = result.usedMemoryIds || [];
+      update((d) => {
+        // Recalled memories get a small boost so facts that keep proving
+        // useful survive the decay curve.
+        let list = bumpHits(d.memories[id] || [], usedIds);
+        if (memory)
+          list = mergeMemory(list, memory, {
+            id: uid(),
+            date: dayKey(),
+            emoji: "🌿",
+          }).list;
+        return { ...d, memories: { ...d.memories, [id]: list } };
+      });
       // The AI has already replied. Disk failure is retried via the save banner,
       // not by asking DeepSeek again and duplicating the assistant turn.
       await flushSave().catch(() => {});
@@ -932,6 +969,17 @@ export default function App({ initialData }) {
             </button>
           ))}
         </div>
+        <div className="size-picker" aria-label="预览高度">
+          {[667, 874].map((h) => (
+            <button
+              key={h}
+              aria-pressed={height === h}
+              onClick={() => setHeight(h)}
+            >
+              {h}
+            </button>
+          ))}
+        </div>
         <button
           className="connection-chip"
           onClick={() => setSheet({ type: "connection" })}
@@ -946,7 +994,13 @@ export default function App({ initialData }) {
               : "演示模式"}
         </button>
       </div>
-      <div className="app-shell" style={{ "--phone-width": `${width}px` }}>
+      <div
+        className="app-shell"
+        style={{
+          "--phone-width": `${width}px`,
+          "--phone-height": `${height}px`,
+        }}
+      >
         <div
           className={`screen screen-${page} ${page === "chat" ? "background-" + ({ 原稿灰: "gray", 米白: "cream", 风景: "scenic" }[prefs.background] || "gray") : ""}`}
           key={page + "-" + (route.person || "")}
@@ -1497,7 +1551,9 @@ export default function App({ initialData }) {
                   有新消息 ↓
                 </button>
               )}
-              <div className="composer frosted-glass">
+              <div
+                className={`composer frosted-glass${draft.trim() ? " has-draft" : ""}`}
+              >
                 <IconButton label="语音输入" onClick={voice}>
                   <img
                     className="design-icon"
@@ -1545,7 +1601,7 @@ export default function App({ initialData }) {
                     onClick={send}
                     disabled={!!busy[pid]}
                   >
-                    <ArrowUp size={23} />
+                    <ArrowUp size={16} strokeWidth={2.5} />
                   </button>
                 ) : (
                   <IconButton
@@ -1812,14 +1868,21 @@ export default function App({ initialData }) {
                 <p className="profile-bio">{person.bio}</p>
                 <div className="profile-section">
                   <h3>关于 TA</h3>
-                  <p>
-                    {person.setting ||
-                      "一个可以听你说日常、也愿意分享小事的 AI 角色。不必找一个特别的话题，想到什么，都可以说。"}
-                  </p>
-                  {person.style && <p>表达风格：{person.style}</p>}
-                  {person.relationship && (
-                    <p>与你的关系：{person.relationship}</p>
-                  )}
+                  {[
+                    person.style && `表达风格：${person.style}`,
+                    person.relationship && `与你的关系：${person.relationship}`,
+                    !person.style &&
+                      !person.relationship &&
+                      "愿意听你分享日常，也会回应自己的小事。",
+                    !person.style &&
+                      !person.relationship &&
+                      "想到什么都可以说，不需要准备特别的话题。",
+                  ]
+                    .filter(Boolean)
+                    .slice(0, 2)
+                    .map((detail) => (
+                      <p key={detail}>{detail}</p>
+                    ))}
                 </div>
                 <SettingRow
                   label="一起留下的记忆"
@@ -1864,6 +1927,30 @@ export default function App({ initialData }) {
               onComment={setCommentPost}
             />
           )}
+          {page === "my-moments" && (
+            <CommunityFeed
+              data={data}
+              scope="mine"
+              personal
+              onBack={back}
+              onScope={() => {}}
+              update={update}
+              ui={communityUI}
+              onPublish={() => {
+                setFormText("");
+                setPostPhotos([]);
+                pendingPostId.current = null;
+                setPublishError("");
+                setSheet({ type: "post", scope: "friends" });
+              }}
+              onProfile={(id) =>
+                id === "me" ? tab("me") : go({ page: "profile", person: id })
+              }
+              onChat={openChat}
+              onPhoto={setLightbox}
+              onComment={setCommentPost}
+            />
+          )}
           {page === "me" && (
             <>
               <Header
@@ -1898,7 +1985,10 @@ export default function App({ initialData }) {
                     value={config.configured ? "DeepSeek" : "演示模式"}
                     onClick={() => setSheet({ type: "connection" })}
                   />
-                  <SettingRow label="我的日常" onClick={() => tab("moments")} />
+                  <SettingRow
+                    label="我的日常"
+                    onClick={() => go({ page: "my-moments" })}
+                  />
                   <SettingRow label="导出聊天与记忆" onClick={exportData} />
                   <SettingRow
                     label="数据与隐私"
@@ -2078,6 +2168,14 @@ export default function App({ initialData }) {
             }}
             update={update}
             ui={communityUI}
+            onReply={(post, text) =>
+              request("comment", post.person, [
+                {
+                  role: "user",
+                  text: `【朋友圈动态】${post.text}\n【用户评论】${text}`,
+                },
+              ])
+            }
             onClose={() => setCommentPost(null)}
             onSuccess={() => {
               setCommentPost(null);

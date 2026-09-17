@@ -183,7 +183,7 @@ pre {
 }
 .app-shell {
   width: min(var(--phone-width), 100%);
-  height: min(874px, calc(var(--viewport-height) - 116px));
+  height: min(var(--phone-height, 874px), calc(var(--viewport-height) - 116px));
   min-height: 480px;
   position: relative;
   isolation: isolate;
@@ -227,7 +227,7 @@ pre {
   position: absolute;
   inset: auto 0 0;
   height: 0.5px;
-  background: #e7e7e7;
+  background: #c7c7c7;
   pointer-events: none;
 }
 .header h1,
@@ -987,11 +987,22 @@ pre {
     0 0 1px var(--glass-border),
     0 0 6px var(--glass-border),
     0 2px 12px var(--glass-border);
-  transition: border-color 180ms var(--ease);
+  transition:
+    border-color 180ms var(--ease),
+    box-shadow 220ms var(--ease),
+    transform 180ms var(--ease);
 }
 /* Frame 41: focus belongs to the capsule, never a rectangular textarea ring. */
 .composer:has(textarea:focus) {
   border-color: var(--glass-focus);
+}
+.composer.has-draft {
+  border-color: var(--glass-focus);
+  box-shadow:
+    0 0 1px rgba(218, 255, 163, 0.95),
+    0 0 8px rgba(218, 255, 163, 0.78),
+    0 0 22px rgba(218, 255, 163, 0.46),
+    0 2px 14px rgba(218, 255, 163, 0.35);
 }
 .frosted-glass:before {
   content: "";
@@ -1047,12 +1058,41 @@ pre {
 .send-button {
   display: grid;
   place-items: center;
-  width: 34px;
-  height: 34px;
+  /* Keep the same 32px flex slot as the emoji/plus action. The black disc
+     itself is intentionally 27px because the design SVGs include transparent
+     padding around their visible 26.7px rings. */
+  width: 32px;
+  height: 32px;
   border-radius: 50%;
-  background: #566958;
+  background: radial-gradient(
+    circle 13.5px at center,
+    #111219 99%,
+    transparent 100%
+  );
   color: #fff;
   flex: none;
+  border: 0;
+  cursor: pointer;
+  transition:
+    transform 160ms var(--ease),
+    background-color 160ms var(--ease),
+    box-shadow 160ms var(--ease);
+}
+.send-button:hover:not(:disabled) {
+  background: radial-gradient(
+    circle 13.5px at center,
+    #05060a 99%,
+    transparent 100%
+  );
+  box-shadow: 0 2px 8px rgba(17, 18, 25, 0.28);
+  transform: translateY(-1px);
+}
+.send-button:active:not(:disabled) {
+  transform: scale(0.9);
+}
+.send-button:disabled {
+  opacity: 0.48;
+  cursor: wait;
 }
 .system-message {
   text-align: center;
@@ -1095,8 +1135,9 @@ pre {
   color: #66756a;
   z-index: 3;
 }
-.highlighted .bubble {
-  animation: highlight 2s var(--ease);
+.highlighted .bubble,
+.highlighted .bubble:before {
+  animation: highlight 1200ms var(--ease);
 }
 .profile-row {
   display: flex;
@@ -2019,11 +2060,11 @@ pre {
 }
 @keyframes highlight {
   0%,
-  60% {
-    box-shadow: 0 0 0 3px #9eaf83;
+  55% {
+    background-color: #e4f3cf;
   }
   100% {
-    box-shadow: none;
+    background-color: var(--bubble);
   }
 }
 @keyframes scene-breathe {

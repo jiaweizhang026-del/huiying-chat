@@ -24,6 +24,8 @@ export function CommunityFeed({
   onPhoto,
   update,
   ui,
+  personal = false,
+  onBack,
 }) {
   const { Header, IconButton, Icon, Avatar, Photo, Tags, personById } = ui;
   const [expanded, setExpanded] = useState({});
@@ -31,22 +33,31 @@ export function CommunityFeed({
     <>
       <Header
         title={
-          <span className="community-tabs" role="tablist" aria-label="社区分栏">
-            {[
-              ["friends", "朋友圈"],
-              ["square", "广场"],
-            ].map(([key, label]) => (
-              <button
-                key={key}
-                role="tab"
-                aria-selected={scope === key}
-                onClick={() => onScope(key)}
-              >
-                {label}
-              </button>
-            ))}
-          </span>
+          personal ? (
+            "我的日常"
+          ) : (
+            <span
+              className="community-tabs"
+              role="tablist"
+              aria-label="社区分栏"
+            >
+              {[
+                ["friends", "朋友圈"],
+                ["square", "广场"],
+              ].map(([key, label]) => (
+                <button
+                  key={key}
+                  role="tab"
+                  aria-selected={scope === key}
+                  onClick={() => onScope(key)}
+                >
+                  {label}
+                </button>
+              ))}
+            </span>
+          )
         }
+        onBack={personal ? onBack : undefined}
         right={
           <IconButton label="发布日常" onClick={onPublish}>
             <Icon name="s3-imgLine2" />
@@ -59,7 +70,7 @@ export function CommunityFeed({
         role="tabpanel"
         aria-label={scope === "square" ? "广场动态" : "朋友圈动态"}
       >
-        {visiblePosts(data, scope).map((post) => {
+        {visiblePosts(data, personal ? "mine" : scope).map((post) => {
           const p =
             post.person === "me"
               ? {
@@ -212,6 +223,7 @@ export function CommentComposer({
   onDraft,
   onClose,
   onSuccess,
+  onReply,
   update,
   ui,
 }) {
@@ -242,6 +254,29 @@ export function CommentComposer({
     );
     try {
       await flushSave();
+      if (onReply && post.person !== "me") {
+        const result = await onReply(post, text.trim());
+        const replies = Array.isArray(result?.messages)
+          ? result.messages.filter((x) => typeof x === "string" && x.trim())
+          : [];
+        if (replies.length) {
+          update((d) =>
+            changePost(d, post.id, (p) => ({
+              ...p,
+              comments: [
+                ...p.comments,
+                ...replies.slice(0, 2).map((reply) => ({
+                  id: uid(),
+                  name: ui.personById(post.person)?.name || post.person,
+                  text: reply,
+                  ai: true,
+                })),
+              ],
+            })),
+          );
+          await flushSave();
+        }
+      }
       onDraft("");
       onSuccess();
     } catch (e) {

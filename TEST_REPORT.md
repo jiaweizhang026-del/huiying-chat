@@ -76,6 +76,24 @@
 - Hi 使用原稿六个 SVG 笔画和逐笔遮罩，约 3 秒写完后停留，完成状态目视核对；减少动态效果时直接显示完整字样。
 - 欢迎页微信按钮每次固定进入 Life gift；测试已改为验证回到欢迎页后再次点击也进入引导。
 
+## 2026-09-17 聊天体验 P0（人设卡 / 时间感知 / 记忆挑选）
+
+- 新增 `shared/memory.mjs`（记忆规范化、去重合并、打分挑选、降噪）、`shared/persona-cards.mjs`（8个内置角色的人设卡）、`shared/context.mjs`（当前时间、距上次对话、深夜/午饭提示）、`shared/prompt.mjs`（system 组装，稳定块在前、易变时间在末尾以吃到 DeepSeek 前缀缓存）。
+- 模型现在回传结构化记忆 `{text, kind, salience, emotion}`；重复事实合并计数不再堆叠；进入模型的记忆由打分挑选（稳定事实保底 4 条），图片条目与演示摘录不占槽位；被实际用上的记忆会加权（hits）。`server/state-store.mjs` 相应放宽并校验新字段。
+- `tests/memory.test.mjs` 11 项通过（去重、降噪、40天前的稳定事实仍入选、query 相关记忆靠前、敏感信息拒绝、prompt 块顺序、新字段通过状态校验）。
+- 本次实际运行：`npm run build` 通过；单测共 27 项——26 通过、1 项因本机已配置真实密钥而跳过（避免付费）；`npm run test:ui` 通过（使用系统 Chrome：`PLAYWRIGHT_CHROME_PATH='/Applications/Google Chrome.app/Contents/MacOS/Google Chrome'`）。
+- 真实 API 验证 1 次（deepseek-flash）：返回 3 条短气泡「嗯。桂花乌龙。/ 这个点……吃了没？/ 累了就坐会儿，别站着说话。」，旁白与结构化记忆均正常：
+  `{"text":"最喜欢喝桂花乌龙","kind":"preference","salience":4,"emotion":"温和"}`。
+- 尚未验证：多轮长对话后挑选策略的实际体感与 token 成本变化、跨角色记忆共享、情绪化效果的主观评价；这些属于 P1/P2 范围。
+
+## 2026-09-17 记忆与时间逻辑修复回归
+
+- 修正发送后时间间隔为零、入选记忆全部累加 hits、旧版聊天摘录混入上下文、30天半衰公式与描述不符、自定义关系被固定为刚认识等问题。重复确认与引用分为 mentionCount / referenceCount；同义事实支持保守规则和受限 matchId，不跨日期自动合并事件。
+- 深夜和午饭提示扫描完整历史识别已提醒状态，跨午夜按同一晚处理；关键词识别存在覆盖边界，并非绝对保证模型不重复。
+- 实际验证：26项离线单元测试通过（memory/store/persistence/custom-characters/community），`npm run build` 通过。
+- `PLAYWRIGHT_CHROME_PATH='/Applications/Google Chrome.app/Contents/MacOS/Google Chrome' node tests/run-isolated.mjs --memory` 通过：浏览器真实点击发送 → 检查请求间隔/摘录过滤 → 模拟模型返回有效/重复/非法引用ID → 验证仅被引用事实加权、重复事实合并及刷新持久化。使用临时数据，没有修改用户聊天。
+- 本轮未调用真实 DeepSeek，未执行全部UI套件；真实模型的语义合并准确性、引用自报准确性、长期多轮体感尚需验证。以上不替代历史测试记录，也不把模拟响应视为真实API通过。
+
 ## 尚未验证 / 明确边界（历史记录）
 
 - 2026-09-15 用户报告偶发「连接或回复格式异常」：单独表情真实请求复测HTTP200、3段回复，约1.5秒，未复现原故障。当前服务把网络异常与JSON解析/字段校验失败合并提示，历史无对应诊断信息，不能断定那次根因；本次仅修正输入框焦点样式，没有声称修复接口偶发问题。

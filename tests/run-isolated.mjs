@@ -35,17 +35,19 @@ try {
     await new Promise((r) => setTimeout(r, 100));
   }
   if (!ready) throw new Error("Isolated test server did not start");
-  const script = live
-    ? "tests/live.mjs"
-    : process.argv.includes("--visual")
-      ? "tests/visual.mjs"
-      : process.argv.includes("--companion")
-        ? "tests/companion.mjs"
-        : process.argv.includes("--community")
-          ? "tests/community.mjs"
-          : hmr
-            ? "tests/hmr.mjs"
-            : "tests/ui.mjs";
+  const script = process.argv.includes("--memory")
+    ? "tests/memory-ui.mjs"
+    : live
+      ? "tests/live.mjs"
+      : process.argv.includes("--visual")
+        ? "tests/visual.mjs"
+        : process.argv.includes("--companion")
+          ? "tests/companion.mjs"
+          : process.argv.includes("--community")
+            ? "tests/community.mjs"
+            : hmr
+              ? "tests/hmr.mjs"
+              : "tests/ui.mjs";
   const runner = spawn(process.execPath, [script], {
     env: { ...process.env, TEST_URL: url },
     stdio: "inherit",

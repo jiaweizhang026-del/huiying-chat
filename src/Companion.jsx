@@ -13,7 +13,8 @@ export function Onboarding({ onCreate, onChoose, Photo }) {
       </div>
       <Photo
         className="gift-art"
-        src="/assets/v3-onboard-imgClipboardScreenshot17894751591.png"
+        src="/assets/life-gift-cats.gif"
+        alt="两只自在相遇的小猫"
       />
       <div className="gift-actions">
         <button className="pill-button primary" onClick={onCreate}>
@@ -37,10 +38,17 @@ export function CreateCompanion({
 }) {
   const { Header, Photo } = ui;
   const [busy, setBusy] = useState(false),
-    [error, setError] = useState("");
+    [error, setError] = useState(""),
+    [editing, setEditing] = useState(null);
   const lock = useRef(false),
     input = useRef(null),
     alive = useRef(true);
+  const fieldMeta = {
+    name: ["昵称", "TA 的名字...", 80],
+    setting: ["资料", "描述人物的背景、行为", 2000],
+    style: ["资料", "描述角色的语言特点～", 500],
+    relationship: ["资料", "描述和 TA 的关系，例如恋人、朋友", 500],
+  };
   useEffect(() => {
     alive.current = true;
     return () => {
@@ -116,62 +124,36 @@ export function CreateCompanion({
               }}
             />
           </div>
-          <label>
-            备注 <span className="field-emoji">🖊️</span>
-            <span className="sr-only">（必填）</span>
-            <input
-              aria-label="备注"
-              required
-              maxLength={80}
-              placeholder="TA 的名字..."
-              value={draft.name}
-              onChange={(e) => change("name", e.target.value)}
-            />
-          </label>
-          <label>
-            性别 <span className="field-emoji">♀♂</span>
-            <select
-              aria-label="性别"
-              value={draft.gender}
-              onChange={(e) => change("gender", e.target.value)}
+          {[
+            ["name", "备注", "TA 的名字...", 80],
+            ["gender", "性别", "选择性别"],
+            ["setting", "人物设定", "描述人物的背景、行为", 2000],
+            ["style", "表达风格", "描述角色的语言特点～", 500],
+            [
+              "relationship",
+              "关系设定",
+              "描述和 TA 的关系，例如恋人、朋友",
+              500,
+            ],
+          ].map(([key, title, placeholder, maxLength]) => (
+            <button
+              type="button"
+              className="field-row"
+              key={key}
+              onClick={() => setEditing(key)}
             >
-              <option value="">选择性别</option>
-              <option>男</option>
-              <option>女</option>
-              <option>其他</option>
-            </select>
-          </label>
-          <label>
-            人物设定<span className="sr-only">（必填）</span>
-            <textarea
-              aria-label="人物设定"
-              required
-              maxLength={2000}
-              placeholder="描述人物的背景、行为"
-              value={draft.setting}
-              onChange={(e) => change("setting", e.target.value)}
-            />
-          </label>
-          <label>
-            表达风格
-            <textarea
-              aria-label="表达风格"
-              maxLength={500}
-              placeholder="描述角色的语言特点～"
-              value={draft.style}
-              onChange={(e) => change("style", e.target.value)}
-            />
-          </label>
-          <label>
-            关系设定
-            <textarea
-              aria-label="关系设定"
-              maxLength={500}
-              placeholder="描述和 TA 的关系，例如恋人、朋友"
-              value={draft.relationship}
-              onChange={(e) => change("relationship", e.target.value)}
-            />
-          </label>
+              <span>
+                {title}
+                {key === "name" && <span className="field-emoji">🖊️</span>}
+              </span>
+              <span
+                className={draft[key] ? "field-value" : "field-placeholder"}
+              >
+                {draft[key] || placeholder}
+              </span>
+              <span className="field-arrow">›</span>
+            </button>
+          ))}
         </fieldset>
         <p className="form-hint">备注和人物设定为必填，其余可以稍后补充。</p>
         {error && (
@@ -182,6 +164,78 @@ export function CreateCompanion({
         <button className="pill-button companion-save" disabled={busy}>
           {busy ? "正在保存…" : "保存"}
         </button>
+        {editing && (
+          <div
+            className="field-sheet-backdrop"
+            onClick={() => setEditing(null)}
+          >
+            <section
+              className="field-sheet"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <button
+                type="button"
+                className="field-sheet-close"
+                onClick={() => setEditing(null)}
+                aria-label="关闭"
+              >
+                ×
+              </button>
+              <h2>
+                TA{" "}
+                {editing === "name"
+                  ? "的昵称"
+                  : editing === "gender"
+                    ? "的性别"
+                    : "的资料"}
+              </h2>
+              {editing === "gender" ? (
+                <div
+                  className="gender-options"
+                  role="radiogroup"
+                  aria-label="选择性别"
+                >
+                  {["男", "女", "其他"].map((gender) => (
+                    <button
+                      type="button"
+                      className={draft.gender === gender ? "selected" : ""}
+                      key={gender}
+                      role="radio"
+                      aria-checked={draft.gender === gender}
+                      onClick={() => {
+                        change("gender", gender);
+                        setEditing(null);
+                      }}
+                    >
+                      {gender}
+                    </button>
+                  ))}
+                </div>
+              ) : (
+                <>
+                  <textarea
+                    autoFocus
+                    maxLength={fieldMeta[editing][2]}
+                    value={draft[editing]}
+                    placeholder={
+                      editing === "name" ? "TA 叫什么？" : fieldMeta[editing][1]
+                    }
+                    onChange={(e) => change(editing, e.target.value)}
+                  />
+                </>
+              )}
+              {editing !== "gender" && (
+                <button
+                  type="button"
+                  className="pill-button sheet-action"
+                  onClick={() => setEditing(null)}
+                >
+                  保存
+                </button>
+              )}
+            </section>
+          </div>
+        )}
       </form>
     </>
   );

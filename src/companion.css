@@ -158,9 +158,9 @@
 .gift-art {
   background: transparent;
   position: absolute;
-  top: 28.5%;
-  left: 25.5%;
-  width: 49%;
+  top: 24%;
+  left: 16%;
+  width: 68%;
   aspect-ratio: 1;
   height: auto;
 }
@@ -240,7 +240,7 @@
   padding: 0;
   margin: 0;
   display: grid;
-  gap: 16px;
+  gap: 0;
   min-width: 0;
 }
 .avatar-upload {
@@ -253,8 +253,9 @@
 .avatar-upload button {
   width: 114px;
   height: 114px;
-  border-radius: 40px;
-  background: var(--bubble);
+  border-radius: 50%;
+  border: 1px solid rgba(17, 32, 70, 0.12);
+  background: #fff;
   display: grid;
   place-items: center;
   overflow: hidden;
@@ -264,10 +265,122 @@
   height: 114px;
 }
 .companion-form label {
-  display: block;
+  position: relative;
+  display: grid;
+  grid-template-columns: 100px minmax(0, 1fr) 18px;
+  align-items: center;
+  min-height: 64px;
+  border-bottom: 1px solid rgba(17, 32, 70, 0.05);
   font-size: 13px;
   line-height: 20px;
   color: #5d6272;
+}
+.companion-form label > span:first-child {
+  min-width: 0;
+}
+.field-row {
+  position: relative;
+  display: grid;
+  grid-template-columns: 100px minmax(0, 1fr) 18px;
+  align-items: center;
+  width: 100%;
+  min-height: 64px;
+  padding: 0;
+  border: 0;
+  border-bottom: 1px solid rgba(17, 32, 70, 0.05);
+  background: transparent;
+  text-align: left;
+  color: #5d6272;
+}
+.field-value,
+.field-placeholder {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.field-placeholder {
+  color: rgba(6, 21, 66, 0.2);
+}
+.field-arrow {
+  justify-self: end;
+  font-size: 27px;
+  color: #9aa1b1;
+}
+.field-sheet-backdrop {
+  position: absolute;
+  inset: 0;
+  z-index: 20;
+  background: rgba(0, 0, 0, 0.2);
+  display: flex;
+  align-items: flex-end;
+}
+.field-sheet {
+  position: relative;
+  width: 100%;
+  min-height: 0;
+  padding: 24px 16px 28px;
+  border-radius: 28px 28px 0 0;
+  background: #fff;
+  box-shadow: 0 -8px 30px rgba(0, 0, 0, 0.12);
+}
+.field-sheet h2 {
+  margin: 0 0 28px;
+  text-align: center;
+  font-size: 15px;
+  font-weight: 400;
+}
+.field-sheet-close {
+  position: absolute;
+  top: 20px;
+  left: 16px;
+  width: 36px;
+  height: 36px;
+  border: 0;
+  border-radius: 12px;
+  background: #fff;
+  font-size: 30px;
+  line-height: 1;
+}
+.field-sheet textarea,
+.field-sheet select {
+  display: block;
+  width: 100%;
+  min-height: 130px;
+  padding: 18px;
+  border: 1px solid #e5e7ea;
+  border-radius: 14px;
+  background: #fafafa;
+  color: #272933;
+  font-size: 18px;
+  resize: none;
+}
+.field-sheet textarea::placeholder {
+  color: #b7b8bb;
+  opacity: 1;
+}
+.field-sheet select {
+  min-height: 54px;
+}
+.gender-options {
+  display: grid;
+  gap: 10px;
+  margin-top: 24px;
+}
+.gender-options button {
+  min-height: 52px;
+  border: 1px solid #e4e6e8;
+  border-radius: 14px;
+  background: #fff;
+  color: #272933;
+  font-size: 18px;
+}
+.gender-options button.selected {
+  border-color: var(--glass-focus);
+  background: #fbfff5;
+}
+.field-sheet .sheet-action {
+  margin-top: 22px;
 }
 .field-emoji {
   display: inline-grid;
@@ -284,12 +397,12 @@
   display: block;
   box-sizing: border-box;
   width: 100%;
-  margin-top: 8px;
-  min-height: 54px;
-  padding: 14px 8px;
+  margin-top: 0;
+  min-height: 40px;
+  padding: 8px 0;
   border: 0;
-  border-radius: 4px;
-  background: var(--bubble);
+  border-radius: 0;
+  background: transparent;
   color: #272933;
   font:
     16px/24px "PingFang SC",
@@ -297,19 +410,33 @@
   box-shadow: none;
 }
 .companion-form textarea {
-  height: 54px;
-  resize: vertical;
-  max-height: 180px;
+  height: 40px;
+  resize: none;
+  max-height: 40px;
+  overflow: hidden;
+}
+.companion-form label::after {
+  content: "›";
+  justify-self: end;
+  font-size: 27px;
+  font-weight: 300;
+  color: #9aa1b1;
+}
+.companion-form label:has(textarea)::after,
+.companion-form label:has(input)::after,
+.companion-form label:has(select)::after {
+  pointer-events: none;
 }
 .companion-form :is(input, textarea)::placeholder {
   color: rgba(6, 21, 66, 0.2);
 }
 .companion-form :is(input, textarea, select):focus {
   outline: 0;
-  background: #f2f3f4;
+  background: transparent;
 }
 .companion-form select:focus-visible {
-  outline: 2px solid #8b9aab;
+  outline: 2px solid var(--glass-focus);
+  outline-offset: 0;
 }
 .companion-save {
   margin-top: 30px;
