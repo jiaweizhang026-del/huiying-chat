@@ -95,6 +95,7 @@ export function visiblePosts(data, scope) {
       (p.scope || "friends") === scope &&
       (scope === "square" ||
         p.person === "me" ||
+        p.seed ||
         data.contacts.includes(p.person)),
   );
 }
